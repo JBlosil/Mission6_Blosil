@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Mission6_Blosil.Models;
 using System.Diagnostics;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Mission6_Blosil.Controllers
 {
@@ -23,13 +24,16 @@ namespace Mission6_Blosil.Controllers
         }
 
         [HttpGet]
-        public IActionResult Movies()
+        public IActionResult MovieForm()
         {
-            return View();
+            ViewBag.Categories = _context.Categories
+                .OrderBy(x => x.CategoryName).ToList();
+
+            return View(new Movie());
         }
 
         [HttpPost]
-        public IActionResult Movies(MovieSubmission response)
+        public IActionResult MovieForm(Movie response)
         {
             if (!ModelState.IsValid)
             {
@@ -38,11 +42,58 @@ namespace Mission6_Blosil.Controllers
             }
             else
             {
-                _context.MovieSubmission.Add(response); //Add record to database
+                _context.Movies.Add(response); //Add record to database
                 _context.SaveChanges();
             }
 
             return View("MovieSubmitted");
+        }
+
+        public IActionResult MovieTable()
+        {
+            var movies = _context.Movies
+                 .OrderBy(x => x.Category).ToList();
+
+            return View(movies);
+        }
+
+        [HttpGet]
+        public IActionResult Edit(int id)
+        {
+            var recordEdit = _context.Movies
+                .Single(x => x.MovieId == id);
+
+            ViewBag.Categories = _context.Categories
+            .OrderBy(x => x.CategoryName).ToList();
+
+            return View("MovieForm", recordEdit);
+        }
+
+        [HttpPost]
+        public IActionResult Edit(Movie updatedInfo)
+        {
+            _context.Update(updatedInfo);
+            _context.SaveChanges();
+
+            return RedirectToAction("MovieTable");
+        }
+
+        [HttpGet]
+        public IActionResult Delete(int id)
+        {
+            var recordDelete = _context.Movies
+            .Single(x => x.MovieId == id);
+
+            return View(recordDelete);
+        }
+
+        [HttpPost]
+        public IActionResult Delete(Movie appID)
+        {
+            _context.Movies.Remove(appID);
+            _context.SaveChanges();
+
+            return RedirectToAction("MovieTable");
         }
     }
 }
