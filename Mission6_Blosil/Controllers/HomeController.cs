@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Mission6_Blosil.Models;
 using System.Diagnostics;
 using static System.Net.Mime.MediaTypeNames;
@@ -51,8 +52,8 @@ namespace Mission6_Blosil.Controllers
 
         public IActionResult MovieTable()
         {
-            var movies = _context.Movies
-                 .OrderBy(x => x.Category).ToList();
+            var movies = _context.Movies.Include("Category")
+                 .OrderBy(x => x.Title).ToList();
 
             return View(movies);
         }
